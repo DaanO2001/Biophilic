@@ -767,73 +767,80 @@
   /* ---------- MOBILE LAYOUT ---------- */
   @media (max-width: 900px){
     html, body{
-      /* Critical for mobile: don't lock the body so the feed can receive touch */
       overflow: hidden;
       height: 100%;
       position: fixed;
       width: 100%;
-    }
-    body{
       overscroll-behavior: none;
     }
 
     .stage{
-      grid-template-columns: 1fr;
-      grid-template-rows: 52px 1fr auto;
-      grid-template-areas:
-        "header"
-        "phone"
-        "right";
-    }
-
-    .left{ display:none; }
-
-    /* Header: tighter on mobile */
-    .header{ padding: 0 16px;}
-    .brand .mark{ font-size: 16px;}
-    .brand .sub{ display:none;}
-    .header .meta{ gap: 12px; font-size: 9px;}
-    .header .meta span:first-child{ display:none;}
-
-    /* Phone area takes the full available space, no fake bezels */
-    .phone-wrap{ padding: 0; }
-    .halo{ display:none;}
-    .phone{
+      display: flex !important;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh; /* dynamic viewport height — handles mobile browser bars */
       width: 100vw;
-      height: 100%;
-      max-width: none;
-      max-height: none;
-      background: transparent;
-      border-radius: 0;
-      padding: 0;
-      box-shadow: none;
     }
-    .stage.calm .phone{ box-shadow: none;}
-    .screen{
-      border-radius: 0;
-    }
-    /* Hide the fake notch on mobile — the real device has its own */
-    .notch{ display:none;}
-    /* Move the status bar out of the way of real device UI */
-    .status-bar{ top: 10px;}
 
-    /* Feed: ensure native touch scrolling works */
+    .left{ display: none !important; }
+
+    /* Header */
+    .header{
+      flex: 0 0 48px;
+      padding: 0 16px;
+    }
+    .brand .mark{ font-size: 15px;}
+    .brand .sub{ display:none;}
+    .header .meta{ gap: 10px; font-size: 9px;}
+    .header .meta span:first-child,
+    .header .meta span:nth-child(2){ display:none;}
+
+    /* Phone area: fills remaining space */
+    .phone-wrap{
+      flex: 1 1 auto;
+      padding: 0 !important;
+      min-height: 0; /* allow it to shrink */
+      width: 100%;
+    }
+    .halo{ display:none !important;}
+    .phone{
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      background: transparent !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+    }
+    .stage.calm .phone{ box-shadow: none !important;}
+    .screen{
+      border-radius: 0 !important;
+      width: 100%;
+      height: 100%;
+    }
+    .notch{ display:none !important;}
+    .status-bar{ top: 12px;}
+
+    /* Feed: native touch scroll */
     .feed{
-      inset: 78px 0 60px 0;
+      inset: 76px 0 60px 0 !important;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
     }
+    .home-indicator{ display:none;}
 
-    /* Right rail becomes a slim dashboard strip BELOW the phone */
+    /* Right rail becomes a strip below */
     .right{
+      flex: 0 0 auto;
       border-left: none;
       border-top: 1px solid rgba(255,255,255,.08);
-      padding: 14px 16px;
+      padding: 12px 16px;
       flex-direction: row;
       flex-wrap: wrap;
-      gap: 14px;
-      background: rgba(7,9,12,.85);
+      gap: 10px 14px;
+      background: rgba(7,9,12,.92);
       backdrop-filter: blur(8px);
     }
     .gauge{
@@ -846,30 +853,26 @@
     .gauge .caption{ display:none;}
     .bloom-state{
       flex: 1 1 100%;
-      margin-top: 0;
-      border-top: 1px solid rgba(255,255,255,.06);
-      padding-top: 12px;
+      margin-top: 4px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .bloom-state .label{ margin-bottom: 0;}
-    .bloom-state .val{ font-size: 32px;}
+    .bloom-state .val{ font-size: 28px;}
     .bloom-state .phase{ display:none;}
 
-    /* Corner controls stay floating */
-    .corner{ right: 14px; bottom: 14px;}
-    .panel{ width: 240px; bottom: 100px;}
-
-    /* Scroll hint slightly higher to avoid home indicator */
+    /* Floating controls */
+    .corner{ right: 12px; bottom: 12px;}
+    .panel{ width: 230px; bottom: 100px;}
     .scroll-hint{ bottom: 70px;}
   }
 
-  /* Extra-small phones */
   @media (max-width: 380px){
-    .right{ padding: 10px 12px; gap: 10px;}
-    .gauge .label b{ font-size: 10px;}
-    .bloom-state .val{ font-size: 26px;}
+    .right{ padding: 10px 12px; gap: 8px 10px;}
+    .bloom-state .val{ font-size: 24px;}
   }
 </style>
 </head>

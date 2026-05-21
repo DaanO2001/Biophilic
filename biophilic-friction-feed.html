@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biophilic Friction Feed — Nyctinasty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@300;400;500&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night-0: #07090c;
+    --night-1: #0b0f15;
+    --night-2: #11161f;
+    --ink: #e7ecf2;
+    --ink-dim: #8a93a3;
+    --ink-faint: #4a5466;
+    --moss: #2a3a2e;
+    --leaf: #6a8f6f;
+    --pollen: #c7b27a;
+    --bloom-petal: #2d4a35;
+    --bloom-petal-edge: #4a6b52;
+    --bloom-veins: #8aae90;
+    --signal: #ff2d55;
+    --signal-2: #ffd60a;
+    --signal-3: #30d158;
+    --signal-4: #0a84ff;
+    --signal-5: #ff375f;
+    --signal-6: #bf5af2;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family: 'Inter Tight', sans-serif;
+    background: var(--night-0);
+    color: var(--ink);
+    overflow: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Grain */
+  body::after{
+    content:"";
+    position: fixed; inset:0;
+    pointer-events:none;
+    z-index: 999;
+    opacity: .3;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  .stage{
+    position: fixed; inset:0;
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    grid-template-rows: 64px 1fr;
+    grid-template-areas:
+      "header header header"
+      "left   phone  right";
+  }
+
+  #swarm{
+    position: fixed; inset:0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Header */
+  .header{
+    grid-area: header;
+    z-index: 5;
+    display:flex; align-items:center; justify-content: space-between;
+    padding: 0 32px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    backdrop-filter: blur(8px);
+    background: linear-gradient(180deg, rgba(7,9,12,.7), rgba(7,9,12,.2));
+  }
+  .brand{
+    display:flex; align-items:baseline; gap: 14px;
+    font-family: 'Fraunces', serif;
+  }
+  .brand .mark{
+    font-size: 22px;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: -.02em;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  .brand .mark em{ color: var(--pollen); font-style: italic; }
+  .brand .sub{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .22em;
+    color: var(--ink-dim);
+  }
+  .header .meta{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .22em;
+    color: var(--ink-dim);
+    display:flex; gap: 24px;
+  }
+  .header .meta span b{ color: var(--ink); font-weight: 500; }
+
+  /* Left rail */
+  .left{
+    grid-area: left;
+    z-index: 4;
+    padding: 28px 28px 28px 32px;
+    display:flex; flex-direction: column; gap: 24px;
+    border-right: 1px solid rgba(255,255,255,.04);
+  }
+  .principle{
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding-top: 20px;
+  }
+  .principle:first-child{ border-top: none; padding-top: 0;}
+  .principle .num{
+    font-family: 'Fraunces', serif;
+    font-size: 42px;
+    line-height: 1;
+    color: var(--ink);
+    font-weight: 300;
+    font-variation-settings: 'SOFT' 100;
+  }
+  .principle .num em{
+    font-style: italic;
+    color: var(--pollen);
+  }
+  .principle h3{
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 18px;
+    margin: 6px 0 8px;
+    letter-spacing: -.01em;
+  }
+  .note{
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink-dim);
+  }
+  .note h4{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--pollen);
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+  .note .lat{
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--leaf);
+    display: block;
+    margin-top: 6px;
+  }
+
+  /* Right rail */
+  .right{
+    grid-area: right;
+    z-index: 4;
+    padding: 28px 32px 28px 28px;
+    display:flex; flex-direction: column; gap: 22px;
+    border-left: 1px solid rgba(255,255,255,.04);
+  }
+  .gauge{
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding-top: 18px;
+  }
+  .gauge:first-child{ border-top: none; padding-top: 0;}
+  .gauge .label{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    display:flex; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .gauge .label b{ color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums;}
+  .bar{
+    height: 4px;
+    background: rgba(255,255,255,.06);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar .fill{
+    position:absolute; inset: 0 100% 0 0;
+    background: linear-gradient(90deg, var(--signal-2), var(--signal));
+    transition: right .25s linear;
+  }
+  .gauge.calm .bar .fill{
+    background: linear-gradient(90deg, var(--leaf), var(--pollen));
+  }
+  .gauge .caption{
+    margin-top: 8px;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    line-height: 1.5;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+  }
+
+  .bloom-state{
+    margin-top: auto;
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding-top: 18px;
+  }
+  .bloom-state .label{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+  }
+  .bloom-state .val{
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: 'SOFT' 100;
+  }
+  .bloom-state .val.armed{ color: var(--signal); }
+  .bloom-state .val.closing{ color: var(--pollen); }
+  .bloom-state .val.fired{ color: var(--leaf); }
+  .bloom-state .val em{ font-style: italic; color: var(--ink-dim); font-size: 20px; margin-left: 4px;}
+  .bloom-state .phase{
+    margin-top: 8px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+
+  /* Phone */
+  .phone-wrap{
+    grid-area: phone;
+    z-index: 3;
+    display:flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  .halo{
+    position: absolute;
+    width: 520px; height: 520px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,45,85,.16), rgba(255,214,10,.06) 40%, transparent 70%);
+    filter: blur(20px);
+    transition: all 1.8s cubic-bezier(.4,0,.2,1);
+    z-index: 0;
+  }
+  .stage.calm .halo{
+    background: radial-gradient(circle, rgba(106,143,111,.22), rgba(42,58,46,.12) 40%, transparent 70%);
+    width: 360px; height: 360px;
+    filter: blur(40px);
+  }
+
+  .phone{
+    position: relative;
+    width: 340px;
+    height: 700px;
+    background: #000;
+    border-radius: 48px;
+    padding: 12px;
+    box-shadow:
+      0 0 0 2px #1a1a1a,
+      0 0 0 4px #2a2a2a,
+      0 30px 80px rgba(0,0,0,.6),
+      0 60px 120px rgba(255,45,85,.15);
+    transition: box-shadow 1.8s cubic-bezier(.4,0,.2,1);
+    z-index: 2;
+  }
+  .stage.calm .phone{
+    box-shadow:
+      0 0 0 2px #1a1a1a,
+      0 0 0 4px #2a2a2a,
+      0 30px 80px rgba(0,0,0,.8),
+      0 60px 120px rgba(106,143,111,.18);
+  }
+
+  .screen{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #fafafa;
+    border-radius: 38px;
+    overflow: hidden;
+    transition: background 2.4s cubic-bezier(.4,0,.2,1);
+  }
+
+  .notch{
+    position: absolute;
+    top: 8px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 28px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 30;
+  }
+
+  .status-bar{
+    position: absolute;
+    top: 14px; left: 0; right: 0;
+    display:flex; justify-content: space-between;
+    padding: 0 26px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #000;
+    z-index: 31;
+    transition: color 2.4s, opacity 2.4s;
+  }
+  .screen.dimmed .status-bar{ color: var(--ink-faint); opacity: .5;}
+  .status-bar .right-icons{ display:flex; gap:5px; align-items:center;}
+
+  .app-header{
+    position: absolute;
+    top: 44px; left: 0; right: 0;
+    padding: 8px 16px 10px;
+    display:flex; align-items: center; justify-content: space-between;
+    z-index: 18;
+    background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.6) 70%, transparent);
+    backdrop-filter: blur(8px);
+    transition: background 2.4s, opacity 2.4s;
+  }
+  .screen.dimmed .app-header{
+    background: linear-gradient(180deg, rgba(11,15,21,.95), rgba(11,15,21,.6) 70%, transparent);
+    opacity: .4;
+  }
+  .app-header .app-name{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -.01em;
+    color: #000;
+    transition: color 2.4s;
+  }
+  .screen.dimmed .app-header .app-name{ color: var(--ink); }
+  .app-header .app-name em{
+    font-style: italic;
+    color: var(--signal);
+  }
+  .screen.dimmed .app-header .app-name em{ color: var(--leaf);}
+  .app-header .icons{
+    display:flex; gap: 14px;
+    color: #000;
+    transition: color 2.4s;
+  }
+  .screen.dimmed .app-header .icons{ color: var(--ink-dim);}
+  .app-header .icons svg{ width: 18px; height: 18px;}
+
+  /* Feed */
+  .feed{
+    position: absolute;
+    inset: 88px 0 80px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    padding: 12px 14px 40px;
+    -webkit-overflow-scrolling: touch;
+    transition: opacity 2.4s cubic-bezier(.4,0,.2,1), filter 2.4s cubic-bezier(.4,0,.2,1);
+  }
+  .feed::-webkit-scrollbar{ display: none;}
+  /* Feed gets dimmed as bloom closes */
+  .screen.dimmed .feed{
+    opacity: 0;
+    filter: saturate(0) blur(4px);
+    pointer-events: none;
+  }
+
+  .post{
+    position: relative;
+    margin-bottom: 18px;
+  }
+  .post .card{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .post:nth-child(6n+1) .card{
+    background:
+      radial-gradient(circle at 30% 20%, var(--signal-2) 0%, transparent 40%),
+      radial-gradient(circle at 70% 80%, var(--signal-5) 0%, transparent 50%),
+      linear-gradient(135deg, var(--signal-6), var(--signal));
+  }
+  .post:nth-child(6n+2) .card{
+    background:
+      radial-gradient(circle at 80% 20%, var(--signal-3) 0%, transparent 40%),
+      radial-gradient(circle at 20% 70%, var(--signal-4) 0%, transparent 50%),
+      linear-gradient(45deg, #ff006e, #ffbe0b);
+  }
+  .post:nth-child(6n+3) .card{
+    background:
+      radial-gradient(circle at 50% 50%, var(--signal-2) 0%, transparent 35%),
+      linear-gradient(135deg, #00f5d4, #ff006e);
+  }
+  .post:nth-child(6n+4) .card{
+    background:
+      radial-gradient(circle at 20% 30%, var(--signal-5) 0%, transparent 45%),
+      radial-gradient(circle at 80% 70%, var(--signal-6) 0%, transparent 45%),
+      linear-gradient(180deg, #ffbe0b, #fb5607);
+  }
+  .post:nth-child(6n+5) .card{
+    background:
+      radial-gradient(circle at 60% 30%, #06ffa5 0%, transparent 40%),
+      radial-gradient(circle at 30% 80%, var(--signal-4) 0%, transparent 50%),
+      linear-gradient(225deg, #8338ec, #ff006e);
+  }
+  .post:nth-child(6n+6) .card{
+    background:
+      radial-gradient(circle at 70% 50%, var(--signal-2) 0%, transparent 40%),
+      linear-gradient(135deg, #ff595e, #ffca3a, #1982c4);
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(45deg,
+        rgba(255,255,255,0) 0px,
+        rgba(255,255,255,0) 6px,
+        rgba(255,255,255,.06) 6px,
+        rgba(255,255,255,.06) 7px);
+    mix-blend-mode: overlay;
+    animation: shimmer 1.6s linear infinite;
+  }
+  @keyframes shimmer{
+    0%{ transform: translateX(0);}
+    100%{ transform: translateX(14px);}
+  }
+  .card .play{
+    position:absolute; bottom: 12px; right: 12px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.4);
+    backdrop-filter: blur(8px);
+    display:flex; align-items:center; justify-content:center;
+    color: #fff; font-size: 14px;
+  }
+  .card .caption{
+    position: absolute;
+    left: 12px; bottom: 14px; right: 60px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.3;
+    text-shadow: 0 1px 4px rgba(0,0,0,.4);
+  }
+  .card .caption span{
+    display:block;
+    font-weight: 400;
+    font-size: 11px;
+    opacity: .85;
+    margin-top: 2px;
+  }
+  .card .badge{
+    position: absolute;
+    top: 10px; left: 10px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: rgba(0,0,0,.4);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .post .meta{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px 0;
+    font-size: 11px;
+    color: #555;
+  }
+  .post .meta .icons{ display:flex; gap: 14px;}
+
+  /* Dark layer that fades in under the bloom — the "night" */
+  .night-layer{
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 50%, var(--night-2) 0%, var(--night-0) 70%);
+    opacity: 0;
+    transition: opacity 3s cubic-bezier(.4,0,.2,1);
+    z-index: 19;
+    pointer-events: none;
+  }
+  .screen.dimmed .night-layer{ opacity: 1;}
+
+  /* ---------- THE FLOWER ---------- */
+  /* SVG flower overlay — starts invisible, fully open above the screen,
+     then becomes visible AND closes its petals over the feed. */
+  .flower{
+    position: absolute;
+    inset: 0;
+    z-index: 25;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s cubic-bezier(.4,0,.2,1);
+  }
+  .screen.bloom-visible .flower{
+    opacity: 1;
+  }
+
+  .flower svg{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Each petal rotates around the center of the screen.
+     CSS vars set per-petal: --r (rotation), --tx,--ty (open offset),
+     --s-open and --s-closed for scale. */
+  .petal{
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    transform:
+      translate(var(--tx, 0px), var(--ty, 0px))
+      rotate(var(--r, 0deg))
+      scale(1);
+    transition:
+      transform 3.6s cubic-bezier(.55,0,.25,1),
+      opacity 2s cubic-bezier(.4,0,.2,1),
+      filter 3.6s cubic-bezier(.4,0,.2,1);
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.3));
+    opacity: .96;
+  }
+  /* When closing, petals collapse toward center & curl */
+  .screen.bloom-closing .petal{
+    transform:
+      translate(0px, 0px)
+      rotate(var(--r, 0deg))
+      scale(.18, 1.05);
+  }
+  .screen.bloom-closed .petal{
+    transform:
+      translate(0px, 0px)
+      rotate(var(--r, 0deg))
+      scale(.05, 1.15);
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)) brightness(.7);
+  }
+
+  /* Singularity core that pulses after closure */
+  .core{
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--pollen) 0%, var(--leaf) 35%, transparent 70%);
+    transform: translate(-50%,-50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 26;
+    filter: blur(8px);
+  }
+  .screen.bloom-closed .core{
+    opacity: 1;
+    transform: translate(-50%,-50%) scale(1);
+    transition: opacity 2.4s ease-in 1.6s, transform 4s cubic-bezier(.4,0,.2,1) 1.6s;
+    animation: breathe 6s ease-in-out infinite 3.5s;
+  }
+  @keyframes breathe{
+    0%,100%{ filter: blur(8px); opacity: .9;}
+    50%{ filter: blur(18px); opacity: .55;}
+  }
+
+  /* Rest message */
+  .rest-msg{
+    position: absolute;
+    bottom: 110px; left: 0; right: 0;
+    text-align: center;
+    color: var(--ink-dim);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 0 36px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 2s ease-in 2.2s, transform 2s ease-in 2.2s;
+    z-index: 27;
+    pointer-events: none;
+  }
+  .rest-msg .lat{
+    display:block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-style: normal;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--leaf);
+    margin-bottom: 10px;
+  }
+  .screen.bloom-closed .rest-msg{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .home-indicator{
+    position: absolute;
+    bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 4px;
+    background: #000;
+    border-radius: 2px;
+    z-index: 30;
+    transition: background 2.4s;
+  }
+  .screen.dimmed .home-indicator{ background: var(--ink-faint);}
+
+  /* Shared state dot */
+  .state-dot{
+    display:inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--signal-2);
+    margin-right: 8px;
+    vertical-align: middle;
+    box-shadow: 0 0 12px var(--signal-2);
+    transition: all .4s;
+  }
+  .state-dot.armed{ background: var(--signal); box-shadow: 0 0 12px var(--signal);}
+  .state-dot.calm{ background: var(--leaf); box-shadow: 0 0 12px var(--leaf);}
+
+  /* Corner controls */
+  .corner{
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .corner-btn{
+    appearance: none;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(11,15,21,.72);
+    backdrop-filter: blur(12px);
+    color: var(--ink);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: all .25s;
+  }
+  .corner-btn:hover{
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.28);
+    transform: translateY(-1px);
+  }
+  .corner-btn svg{ width: 16px; height: 16px;}
+  .corner-btn.reset{
+    background: rgba(199,178,122,.92);
+    border-color: var(--pollen);
+    color: #1a1a1a;
+  }
+  .corner-btn.reset:hover{ background: var(--pollen);}
+
+  .panel{
+    position: absolute;
+    bottom: 92px;
+    right: 0;
+    width: 280px;
+    background: rgba(11,15,21,.92);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+    pointer-events: none;
+    transition: opacity .25s, transform .25s;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .panel.open{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .panel h5{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--pollen);
+    font-weight: 400;
+    margin-bottom: 14px;
+  }
+  .panel .row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .panel .row:first-of-type{ border-top: none;}
+  .panel .row b{
+    color: var(--ink);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .panel .actions{
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    gap: 8px;
+  }
+  .panel .btn-sm{
+    flex: 1;
+    appearance: none;
+    border: 1px solid rgba(255,255,255,.14);
+    background: transparent;
+    color: var(--ink);
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .panel .btn-sm:hover{
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.28);
+  }
+
+  .scroll-hint{
+    position: absolute;
+    bottom: 30px; left: 50%; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,.45);
+    z-index: 17;
+    pointer-events: none;
+    animation: hint 2.4s ease-in-out infinite;
+  }
+  @keyframes hint{
+    0%,100%{ opacity:.4; transform: translate(-50%, 0);}
+    50%{ opacity:.9; transform: translate(-50%, -4px);}
+  }
+  .scrolled .scroll-hint{ opacity: 0; transition: opacity .4s;}
+
+  /* ---------- MOBILE LAYOUT ---------- */
+  @media (max-width: 900px){
+    html, body{
+      /* Critical for mobile: don't lock the body so the feed can receive touch */
+      overflow: hidden;
+      height: 100%;
+      position: fixed;
+      width: 100%;
+    }
+    body{
+      overscroll-behavior: none;
+    }
+
+    .stage{
+      grid-template-columns: 1fr;
+      grid-template-rows: 52px 1fr auto;
+      grid-template-areas:
+        "header"
+        "phone"
+        "right";
+    }
+
+    .left{ display:none; }
+
+    /* Header: tighter on mobile */
+    .header{ padding: 0 16px;}
+    .brand .mark{ font-size: 16px;}
+    .brand .sub{ display:none;}
+    .header .meta{ gap: 12px; font-size: 9px;}
+    .header .meta span:first-child{ display:none;}
+
+    /* Phone area takes the full available space, no fake bezels */
+    .phone-wrap{ padding: 0; }
+    .halo{ display:none;}
+    .phone{
+      width: 100vw;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+    .stage.calm .phone{ box-shadow: none;}
+    .screen{
+      border-radius: 0;
+    }
+    /* Hide the fake notch on mobile — the real device has its own */
+    .notch{ display:none;}
+    /* Move the status bar out of the way of real device UI */
+    .status-bar{ top: 10px;}
+
+    /* Feed: ensure native touch scrolling works */
+    .feed{
+      inset: 78px 0 60px 0;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+    }
+
+    /* Right rail becomes a slim dashboard strip BELOW the phone */
+    .right{
+      border-left: none;
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding: 14px 16px;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 14px;
+      background: rgba(7,9,12,.85);
+      backdrop-filter: blur(8px);
+    }
+    .gauge{
+      flex: 1 1 calc(50% - 14px);
+      border-top: none;
+      padding-top: 0;
+      min-width: 130px;
+    }
+    .gauge .label{ font-size: 9px; margin-bottom: 6px;}
+    .gauge .caption{ display:none;}
+    .bloom-state{
+      flex: 1 1 100%;
+      margin-top: 0;
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bloom-state .label{ margin-bottom: 0;}
+    .bloom-state .val{ font-size: 32px;}
+    .bloom-state .phase{ display:none;}
+
+    /* Corner controls stay floating */
+    .corner{ right: 14px; bottom: 14px;}
+    .panel{ width: 240px; bottom: 100px;}
+
+    /* Scroll hint slightly higher to avoid home indicator */
+    .scroll-hint{ bottom: 70px;}
+  }
+
+  /* Extra-small phones */
+  @media (max-width: 380px){
+    .right{ padding: 10px 12px; gap: 10px;}
+    .gauge .label b{ font-size: 10px;}
+    .bloom-state .val{ font-size: 26px;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="swarm"></canvas>
+
+<div class="stage" id="stage">
+
+  <header class="header">
+    <div class="brand">
+      <div class="mark">Biophilic <em>Friction</em> Feed</div>
+      <div class="sub">Nyctinasty · v0.5</div>
+    </div>
+    <div class="meta">
+      <span>Subject <b>14–19</b></span>
+      <span>Trigger <b>scroll → 5s</b></span>
+      <span>Mode <b id="mode-label">Open</b></span>
+    </div>
+  </header>
+
+  <aside class="left">
+    <div class="principle">
+      <div class="num">0<em>1</em></div>
+      <h3>Nyctinasty</h3>
+      <div class="note">
+        Bij schemering vouwen bladeren en bloemkronen zich naar binnen om hun energie te beschermen. Geen falen — een ritueel van zelfzorg.
+        <span class="lat">— Mimosa pudica · Studio Drift, Shylight</span>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="num">0<em>2</em></div>
+      <h3>De feed als veld</h3>
+      <div class="note">
+        De FYP is een open veld dat constant signalen uitzendt. De bloem komt niet vanuit het scherm — zij komt vanuit buiten, en sluit zich over het veld heen.
+        <span class="lat">— Greep, niet glitch</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="phone-wrap">
+    <div class="halo"></div>
+    <div class="phone">
+      <div class="screen" id="screen">
+
+        <div class="notch"></div>
+
+        <div class="status-bar">
+          <span>22:47</span>
+          <div class="right-icons">
+            <span style="font-size:10px;font-weight:600;">●●●●</span>
+            <span style="font-size:10px;font-weight:600;">5G</span>
+            <span style="font-size:10px;font-weight:600;">87%</span>
+          </div>
+        </div>
+
+        <div class="app-header">
+          <div class="app-name">for <em>you</em></div>
+          <div class="icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </div>
+        </div>
+
+        <div class="feed" id="feed"></div>
+
+        <div class="scroll-hint">↑ Scroll to begin</div>
+
+        <!-- Night layer fades in under the bloom -->
+        <div class="night-layer"></div>
+
+        <!-- THE FLOWER — 9 petals around screen center -->
+        <div class="flower" id="flower">
+          <svg viewBox="0 0 340 700" preserveAspectRatio="none">
+            <defs>
+              <!-- Petal gradient: deep moss with edge highlight -->
+              <linearGradient id="petalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"  stop-color="#0e1a13"/>
+                <stop offset="35%" stop-color="#243a2c"/>
+                <stop offset="70%" stop-color="#3a5a44"/>
+                <stop offset="100%" stop-color="#6a8f6f"/>
+              </linearGradient>
+              <linearGradient id="petalGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"  stop-color="#0a1410"/>
+                <stop offset="40%" stop-color="#1e3024"/>
+                <stop offset="100%" stop-color="#4a6b52"/>
+              </linearGradient>
+              <radialGradient id="petalSheen" cx="50%" cy="80%" r="60%">
+                <stop offset="0%" stop-color="rgba(199,178,122,.35)"/>
+                <stop offset="100%" stop-color="rgba(199,178,122,0)"/>
+              </radialGradient>
+              <!-- Petal shape path used by all petals (defined once) -->
+              <!-- Drawn so the base is at y=0 and tip extends downward.
+                   Each petal is positioned so its base sits at the screen center. -->
+              <symbol id="petalShape" overflow="visible">
+                <path d="
+                  M 0 0
+                  C -42 -40, -58 -160, -22 -300
+                  C -10 -345, -4 -360, 0 -380
+                  C 4 -360, 10 -345, 22 -300
+                  C 58 -160, 42 -40, 0 0
+                  Z" fill="url(#petalGrad)" stroke="#5a7a62" stroke-width="0.6" stroke-opacity=".5"/>
+                <!-- Sheen overlay -->
+                <path d="
+                  M 0 0
+                  C -42 -40, -58 -160, -22 -300
+                  C -10 -345, -4 -360, 0 -380
+                  C 4 -360, 10 -345, 22 -300
+                  C 58 -160, 42 -40, 0 0
+                  Z" fill="url(#petalSheen)" opacity=".6"/>
+                <!-- Central vein -->
+                <path d="M 0 -8 Q 0 -180 0 -360" stroke="#8aae90" stroke-width=".8" stroke-opacity=".5" fill="none"/>
+                <!-- Side veins -->
+                <path d="M 0 -60 Q -16 -110 -28 -170" stroke="#8aae90" stroke-width=".4" stroke-opacity=".35" fill="none"/>
+                <path d="M 0 -60 Q  16 -110  28 -170" stroke="#8aae90" stroke-width=".4" stroke-opacity=".35" fill="none"/>
+                <path d="M 0 -160 Q -14 -210 -22 -260" stroke="#8aae90" stroke-width=".4" stroke-opacity=".3" fill="none"/>
+                <path d="M 0 -160 Q  14 -210  22 -260" stroke="#8aae90" stroke-width=".4" stroke-opacity=".3" fill="none"/>
+              </symbol>
+            </defs>
+
+            <!-- Petals are placed at center (170, 350) and rotated.
+                 The base is at the placement point; the tip points 'up' along their local axis,
+                 so after rotation they fan outward. -->
+            <g transform="translate(170 350)">
+              <!-- 9 petals — odd number gives a more organic, asymmetric look -->
+              <use class="petal" href="#petalShape" style="--r:   0deg;"/>
+              <use class="petal" href="#petalShape" style="--r:  40deg;"/>
+              <use class="petal" href="#petalShape" style="--r:  80deg;"/>
+              <use class="petal" href="#petalShape" style="--r: 120deg;"/>
+              <use class="petal" href="#petalShape" style="--r: 160deg;"/>
+              <use class="petal" href="#petalShape" style="--r: 200deg;"/>
+              <use class="petal" href="#petalShape" style="--r: 240deg;"/>
+              <use class="petal" href="#petalShape" style="--r: 280deg;"/>
+              <use class="petal" href="#petalShape" style="--r: 320deg;"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="core"></div>
+
+        <div class="rest-msg">
+          <span class="lat">— rest state —</span>
+          De bloem heeft zich gesloten.<br>
+          Je energie is van jou.
+        </div>
+
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="right">
+    <div class="gauge" id="gauge-pressure">
+      <div class="label"><span>Groepsdruk</span> <b id="val-pressure">00%</b></div>
+      <div class="bar"><div class="fill" id="fill-pressure"></div></div>
+      <div class="caption">snelheid van de zwerm</div>
+    </div>
+    <div class="gauge" id="gauge-cohesion">
+      <div class="label"><span>V-Cohesie</span> <b id="val-cohesion">12%</b></div>
+      <div class="bar"><div class="fill" id="fill-cohesion"></div></div>
+      <div class="caption">hoe strak de formatie zit</div>
+    </div>
+    <div class="gauge" id="gauge-scroll">
+      <div class="label"><span>Scroll-energie</span> <b id="val-scroll">000</b></div>
+      <div class="bar"><div class="fill" id="fill-scroll"></div></div>
+      <div class="caption">px / seconde, gemiddeld</div>
+    </div>
+
+    <div class="bloom-state">
+      <div class="label">Bloem · timer</div>
+      <div class="val" id="countdown">5.0<em>s</em></div>
+      <div class="phase" id="phase">slapend — buiten beeld</div>
+    </div>
+  </aside>
+
+  <div class="corner">
+    <div class="panel" id="panel">
+      <h5>Instellingen · test</h5>
+      <div class="row">
+        <span><span class="state-dot" id="state-dot"></span>State</span>
+        <b id="state-label">open · feeding</b>
+      </div>
+      <div class="row">
+        <span>Trigger window</span>
+        <b>scroll → 5s</b>
+      </div>
+      <div class="row">
+        <span>Mode</span>
+        <b id="mode-label-2">Open</b>
+      </div>
+      <div class="actions">
+        <button class="btn-sm" id="btn-trigger">Force bloom</button>
+      </div>
+    </div>
+
+    <button class="corner-btn" id="btn-settings" aria-label="Instellingen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.36.14.67.36.91.65.24.29.39.64.42 1.01"/>
+      </svg>
+    </button>
+
+    <button class="corner-btn reset" id="btn-reset" aria-label="Reset">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M3 12a9 9 0 1 0 3-6.7"/>
+        <path d="M3 4v5h5"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   BIOPHILIC FRICTION FEED v2 — flower as actor
+   ========================================================= */
+
+const POSTS_DATA = [
+  { badge: "LIVE",     caption: "POV: niemand slaapt vannacht",  sub: "@lola.exe · 2.1M views" },
+  { badge: "TRENDING", caption: "het is 3 uur en ik scroll nog", sub: "@kai_ · 890K views" },
+  { badge: "FOR YOU",  caption: "this song will be stuck",       sub: "@mia.loop · 4.4M views" },
+  { badge: "NEW",      caption: "haul ✨ ✨ ✨",                   sub: "@ren · 1.2M views" },
+  { badge: "VIRAL",    caption: "wait for the drop 🤯",           sub: "@noa.fm · 6.7M views" },
+  { badge: "LIVE",     caption: "answer me or i'll repost",      sub: "@sam · 312K views" },
+  { badge: "FOR YOU",  caption: "rate my room 1–10",             sub: "@elif · 980K views" },
+  { badge: "TRENDING", caption: "everyone is doing this trend",  sub: "@theo · 3.1M views" },
+  { badge: "NEW",      caption: "don't scroll past this",        sub: "@ines · 540K views" },
+  { badge: "VIRAL",    caption: "last one to like is broke",     sub: "@oz · 2.8M views" },
+];
+
+const feedEl = document.getElementById('feed');
+const screenEl = document.getElementById('screen');
+const stageEl = document.getElementById('stage');
+const flowerEl = document.getElementById('flower');
+
+function buildFeed(){
+  feedEl.innerHTML = '';
+  POSTS_DATA.forEach((p) => {
+    const post = document.createElement('div');
+    post.className = 'post';
+    post.innerHTML = `
+      <div class="card">
+        <div class="badge">${p.badge}</div>
+        <div class="play">▶</div>
+        <div class="caption">${p.caption}<span>${p.sub}</span></div>
+      </div>
+      <div class="meta">
+        <span>${Math.floor(Math.random()*40)+10} min ago</span>
+        <div class="icons">
+          <span>♥ ${(Math.random()*900+100|0)}K</span>
+          <span>💬 ${(Math.random()*40+5|0)}K</span>
+          <span>↗ ${(Math.random()*20+1|0)}K</span>
+        </div>
+      </div>
+    `;
+    feedEl.appendChild(post);
+  });
+}
+buildFeed();
+
+/* ---------- State ---------- */
+const state = {
+  scrolling: false,
+  scrollStartedAt: null,
+  bloomVisible: false,    // petals fading in (opacity)
+  bloomClosing: false,    // petals actively closing
+  bloomClosed: false,     // final rest state
+  pressure: 0,
+  cohesion: 0.12,
+  scrollEnergy: 0,
+  lastScrollAt: 0,
+  lastScrollTop: 0,
+  countdownMs: 5000,
+};
+
+const TRIGGER_DELAY = 5000;        // start bloom after 5s of scrolling
+const BLOOM_FADE_IN_MS = 1200;     // how long the bloom takes to fade in
+const BLOOM_CLOSE_MS = 3600;       // how long the petals take to close (matches CSS)
+
+/* ---------- Scroll handling ---------- */
+feedEl.addEventListener('scroll', () => {
+  if (state.bloomClosed || state.bloomClosing) return;
+  const now = performance.now();
+  const dy = Math.abs(feedEl.scrollTop - state.lastScrollTop);
+  const dt = Math.max(1, now - state.lastScrollAt);
+  const inst = (dy / dt) * 1000;
+  state.scrollEnergy = state.scrollEnergy * 0.7 + inst * 0.3;
+  state.lastScrollAt = now;
+  state.lastScrollTop = feedEl.scrollTop;
+
+  if (!state.scrolling){
+    state.scrolling = true;
+    state.scrollStartedAt = now;
+    screenEl.classList.add('scrolled');
+    setModeLabel('Feeding');
+    updateStateChip('feeding');
+    setPhase('feed wordt waargenomen…');
+  }
+});
+
+/* Force bloom (skip timer) */
+document.getElementById('btn-trigger').addEventListener('click', () => {
+  if (state.bloomClosed) return;
+  state.scrolling = true;
+  state.scrollStartedAt = performance.now() - TRIGGER_DELAY;
+});
+
+/* Settings panel toggle */
+const panelEl = document.getElementById('panel');
+document.getElementById('btn-settings').addEventListener('click', (e) => {
+  e.stopPropagation();
+  panelEl.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if (!panelEl.contains(e.target) && !e.target.closest('#btn-settings')){
+    panelEl.classList.remove('open');
+  }
+});
+
+/* Reset */
+document.getElementById('btn-reset').addEventListener('click', resetAll);
+
+function resetAll(){
+  state.scrolling = false;
+  state.scrollStartedAt = null;
+  state.bloomVisible = false;
+  state.bloomClosing = false;
+  state.bloomClosed = false;
+  state.pressure = 0;
+  state.cohesion = 0.12;
+  state.scrollEnergy = 0;
+  state.countdownMs = 5000;
+
+  screenEl.classList.remove('bloom-visible','bloom-closing','bloom-closed','dimmed','scrolled');
+  stageEl.classList.remove('calm');
+  feedEl.scrollTop = 0;
+
+  setModeLabel('Open');
+  updateStateChip('open');
+  setPhase('slapend — buiten beeld');
+  document.getElementById('countdown').classList.remove('armed','closing','fired');
+
+  initSwarm();
+}
+
+/* ---------- UI helpers ---------- */
+function setModeLabel(text){
+  const a = document.getElementById('mode-label');
+  const b = document.getElementById('mode-label-2');
+  if (a) a.textContent = text;
+  if (b) b.textContent = text;
+}
+function setPhase(text){
+  document.getElementById('phase').textContent = text;
+}
+function updateStateChip(mode){
+  const dot = document.getElementById('state-dot');
+  const label = document.getElementById('state-label');
+  dot.classList.remove('armed','calm');
+  if (mode === 'open' || mode === 'feeding'){ label.textContent = 'open · feeding'; }
+  else if (mode === 'arming'){ dot.classList.add('armed'); label.textContent = 'arming · bloom approaches'; }
+  else if (mode === 'closing'){ dot.classList.add('armed'); label.textContent = 'closing · petals descending'; }
+  else if (mode === 'closed'){ dot.classList.add('calm'); label.textContent = 'closed · rest'; }
+}
+
+/* ---------- Bloom sequence ---------- */
+function startBloomSequence(){
+  if (state.bloomVisible) return;
+  state.bloomVisible = true;
+  // Phase 1: fade in (petals appear, still in 'open' rotation)
+  screenEl.classList.add('bloom-visible');
+  setModeLabel('Approaching');
+  setPhase('de bloem verschijnt…');
+  updateStateChip('arming');
+  document.getElementById('countdown').classList.add('armed');
+
+  // Phase 2: after fade-in, start closing petals AND dimming the feed
+  setTimeout(() => {
+    if (!state.bloomVisible) return; // could have been reset
+    state.bloomClosing = true;
+    screenEl.classList.add('bloom-closing');
+    screenEl.classList.add('dimmed'); // feed fades + night layer fades in
+    stageEl.classList.add('calm');    // halo & swarm calm
+    setModeLabel('Closing');
+    setPhase('blaadjes vouwen naar het centrum');
+    updateStateChip('closing');
+    document.getElementById('countdown').classList.remove('armed');
+    document.getElementById('countdown').classList.add('closing');
+
+    // Phase 3: final closed/rest state
+    setTimeout(() => {
+      if (!state.bloomClosing) return;
+      state.bloomClosed = true;
+      screenEl.classList.add('bloom-closed');
+      setModeLabel('Rest');
+      setPhase('je energie is beschermd');
+      updateStateChip('closed');
+      document.getElementById('countdown').classList.remove('closing');
+      document.getElementById('countdown').classList.add('fired');
+    }, BLOOM_CLOSE_MS);
+  }, BLOOM_FADE_IN_MS);
+}
+
+/* ---------- Main loop ---------- */
+function tick(){
+  const now = performance.now();
+
+  if (state.scrolling && !state.bloomVisible){
+    const elapsed = now - state.scrollStartedAt;
+    const remaining = Math.max(0, TRIGGER_DELAY - elapsed);
+    state.countdownMs = remaining;
+    if (remaining === 0){
+      startBloomSequence();
+    }
+  }
+
+  // Decay scroll energy
+  state.scrollEnergy *= 0.94;
+
+  // Pressure: rises with scroll energy; collapses to 0 once bloom is closed
+  let targetPressure;
+  if (state.bloomClosed) targetPressure = 0;
+  else if (state.bloomClosing) targetPressure = state.pressure * 0.9; // wind down
+  else targetPressure = Math.min(1, state.scrollEnergy / 1200 + (state.scrolling ? 0.25 : 0));
+  state.pressure += (targetPressure - state.pressure) * 0.08;
+
+  // Cohesion: high while scrolling, drops to 0 in rest
+  let targetCoh;
+  if (state.bloomClosed) targetCoh = 0.02;
+  else if (state.bloomClosing) targetCoh = state.cohesion * 0.95;
+  else targetCoh = 0.12 + state.pressure * 0.85;
+  state.cohesion += (targetCoh - state.cohesion) * 0.05;
+
+  // Gauges
+  setGauge('pressure', state.pressure, v => Math.round(v*100).toString().padStart(2,'0') + '%');
+  setGauge('cohesion', state.cohesion, v => Math.round(v*100).toString().padStart(2,'0') + '%');
+  const scrollPct = Math.min(1, state.scrollEnergy / 2000);
+  setGauge('scroll', scrollPct, () => Math.round(state.scrollEnergy).toString().padStart(3,'0'));
+
+  if (state.bloomClosed){
+    document.getElementById('gauge-pressure').classList.add('calm');
+    document.getElementById('gauge-cohesion').classList.add('calm');
+    document.getElementById('gauge-scroll').classList.add('calm');
+  } else {
+    document.getElementById('gauge-pressure').classList.remove('calm');
+    document.getElementById('gauge-cohesion').classList.remove('calm');
+    document.getElementById('gauge-scroll').classList.remove('calm');
+  }
+
+  // Countdown display
+  const cd = document.getElementById('countdown');
+  if (state.bloomClosed){
+    cd.innerHTML = `0.0<em>s</em>`;
+  } else if (state.bloomClosing){
+    cd.innerHTML = `closing<em></em>`;
+  } else if (state.bloomVisible){
+    cd.innerHTML = `≈ 1.0<em>s</em>`;
+  } else {
+    const s = (state.countdownMs/1000);
+    cd.innerHTML = `${s.toFixed(1)}<em>s</em>`;
+  }
+
+  requestAnimationFrame(tick);
+}
+
+function setGauge(key, value01, fmt){
+  const fill = document.getElementById('fill-'+key);
+  const val = document.getElementById('val-'+key);
+  fill.style.right = (100 - value01*100) + '%';
+  val.textContent = fmt(value01);
+}
+requestAnimationFrame(tick);
+
+/* =========================================================
+   V-FORMATION SWARM
+   ========================================================= */
+
+const canvas = document.getElementById('swarm');
+const ctx = canvas.getContext('2d');
+
+let W=0, H=0, DPR=1;
+function resize(){
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+let birds = [];
+let leader = null;
+const PALETTE_ACTIVE = ['#ffd60a','#ff2d55','#ff375f','#bf5af2','#0a84ff','#30d158'];
+const PALETTE_CALM   = ['#6a8f6f','#c7b27a','#8a93a3'];
+
+function initSwarm(){
+  birds = [];
+  const N = 36;
+  for (let i=0;i<N;i++){
+    birds.push({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      vx: (Math.random()-.5)*1.5,
+      vy: (Math.random()-.5)*1.5,
+      color: PALETTE_ACTIVE[i % PALETTE_ACTIVE.length],
+      size: 2 + Math.random()*1.5,
+      life: 1,
+    });
+  }
+  leader = { x: W*0.2, y: H*0.5, vx: 1, vy: 0.3, angle: 0 };
+}
+initSwarm();
+
+function swarmStep(){
+  if (!birds.length) return;
+  const pressure = state.pressure;
+  const cohesion = state.cohesion;
+  const dissolving = state.bloomClosing || state.bloomClosed;
+
+  const cx = W/2, cy = H/2;
+
+  if (dissolving){
+    const dx = cx - leader.x;
+    const dy = cy - leader.y;
+    leader.vx += dx * 0.0008;
+    leader.vy += dy * 0.0008;
+    leader.vx *= 0.96;
+    leader.vy *= 0.96;
+  } else {
+    const t = performance.now() * (0.0003 + pressure*0.0008);
+    const radius = 320 + Math.sin(t*1.7)*80;
+    const tx = cx + Math.cos(t)*radius;
+    const ty = cy + Math.sin(t*1.3)*radius*0.5;
+    const dx = tx - leader.x;
+    const dy = ty - leader.y;
+    const speed = 0.02 + pressure*0.06;
+    leader.vx += dx * speed * 0.05;
+    leader.vy += dy * speed * 0.05;
+    const maxV = 2 + pressure*8;
+    const sp = Math.hypot(leader.vx, leader.vy);
+    if (sp > maxV){ leader.vx *= maxV/sp; leader.vy *= maxV/sp; }
+  }
+  leader.x += leader.vx;
+  leader.y += leader.vy;
+  leader.angle = Math.atan2(leader.vy, leader.vx);
+
+  const ang = leader.angle;
+  const back = Math.cos(ang + Math.PI);
+  const backY = Math.sin(ang + Math.PI);
+  const perpX = Math.cos(ang + Math.PI/2);
+  const perpY = Math.sin(ang + Math.PI/2);
+  const slotSpacing = 14 + (1 - cohesion) * 28;
+
+  for (let i = 0; i < birds.length; i++){
+    const b = birds[i];
+
+    if (dissolving){
+      const dx = cx - b.x;
+      const dy = cy - b.y;
+      b.vx += dx * 0.0015;
+      b.vy += dy * 0.0015;
+      b.vx *= 0.95;
+      b.vy *= 0.95;
+      b.life *= state.bloomClosed ? 0.985 : 0.995;
+      if (Math.random() < 0.02) b.color = PALETTE_CALM[Math.floor(Math.random()*PALETTE_CALM.length)];
+    } else {
+      const side = (i % 2 === 0) ? 1 : -1;
+      const row = Math.floor(i/2) + 1;
+      const slotX = leader.x + back*row*slotSpacing + perpX*side*row*slotSpacing;
+      const slotY = leader.y + backY*row*slotSpacing + perpY*side*row*slotSpacing;
+      const seek = 0.008 + cohesion*0.04;
+      b.vx += (slotX - b.x) * seek;
+      b.vy += (slotY - b.y) * seek;
+      const chaos = (1 - cohesion) * (0.3 + pressure*0.8);
+      b.vx += (Math.random()-.5) * chaos;
+      b.vy += (Math.random()-.5) * chaos;
+      b.vx *= 0.94;
+      b.vy *= 0.94;
+      const maxV = 2 + pressure*9;
+      const sp = Math.hypot(b.vx, b.vy);
+      if (sp > maxV){ b.vx *= maxV/sp; b.vy *= maxV/sp; }
+    }
+    b.x += b.vx; b.y += b.vy;
+    if (b.x < -20) b.x = W+20;
+    if (b.x > W+20) b.x = -20;
+    if (b.y < -20) b.y = H+20;
+    if (b.y > H+20) b.y = -20;
+  }
+}
+
+function swarmDraw(){
+  ctx.fillStyle = state.bloomClosed ? 'rgba(7,9,12,0.18)'
+               : state.bloomClosing ? 'rgba(7,9,12,0.20)'
+               : 'rgba(7,9,12,0.22)';
+  ctx.fillRect(0,0,W,H);
+
+  for (const b of birds){
+    if (b.life < 0.05) continue;
+    const ang = Math.atan2(b.vy, b.vx);
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(ang);
+    ctx.globalAlpha = (state.bloomClosed ? 0.3 : 0.85) * b.life;
+    ctx.fillStyle = b.color;
+    ctx.beginPath();
+    ctx.moveTo(6, 0);
+    ctx.lineTo(-4, 3);
+    ctx.lineTo(-2, 0);
+    ctx.lineTo(-4, -3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = (state.bloomClosed ? 0.06 : 0.25) * b.life;
+    ctx.beginPath();
+    ctx.arc(0, 0, b.size * 4, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  if (state.cohesion > 0.6 && !state.bloomClosing && !state.bloomClosed){
+    ctx.globalAlpha = (state.cohesion - 0.6) * 0.6;
+    ctx.strokeStyle = '#ffd60a';
+    ctx.lineWidth = 0.4;
+    ctx.beginPath();
+    for (let i=0; i<birds.length-1; i++){
+      ctx.moveTo(birds[i].x, birds[i].y);
+      ctx.lineTo(birds[i+1].x, birds[i+1].y);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function swarmLoop(){
+  swarmStep();
+  swarmDraw();
+  requestAnimationFrame(swarmLoop);
+}
+swarmLoop();
+</script>
+</body>
+</html>
